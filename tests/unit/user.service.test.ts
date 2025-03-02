@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import bcrypt from "bcrypt";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import userService from "../../src/services/user.service";
 import User from "../../src/models/user.model";
@@ -6,7 +7,6 @@ import connectDB from "../../src/config/database";
 
 describe("User Service", () => {
   let mongoServer: MongoMemoryServer;
-
 
   beforeAll(async () => {
     // Creamos  la instancia en memoria de MongoDB
@@ -44,6 +44,12 @@ describe("User Service", () => {
     expect(newUser._id).toBeDefined();
     expect(newUser.name).toBe(userData.name);
     expect(newUser.email).toBe(userData.email);
-    // Aquí podrías agregar más validaciones, por ejemplo, que la contraseña esté encriptada
+
+    // Aqui Verifica que la contraseña encriptada NO es igual a la original
+    expect(newUser.password).not.toBe(userData.password);
+
+    // Se utiliza bcrypt.compare para confirmar que la contraseña original coincide con la encriptada
+    const isMatch = await bcrypt.compare(userData.password, newUser.password);
+    expect(isMatch).toBe(true);
   });
 });
