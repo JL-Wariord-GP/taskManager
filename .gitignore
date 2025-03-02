@@ -1,0 +1,64 @@
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Node modules
+node_modules/
+
+# Compiled TypeScript files
+dist/
+dist-ssr/
+
+# Compiled JavaScript and source maps
+*.js
+*.js.map
+*.d.ts
+
+# TypeScript declaration files 
+*.tsbuildinfo
+
+# Package lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Local environment files
+*.local
+.env
+.env.local
+.env.*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# MongoDB local dev databases
+/data/
+
+# Temporary files
+*.tmp
+*.bak
+
+# Coverage directory
+coverage/
+
+# JetBrains IDEs
+.idea/
+
+# Debug and configuration files
+.pnp/
+.pnp.js
+
+# Setup - script
+setup.sh
