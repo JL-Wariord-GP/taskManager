@@ -1,15 +1,19 @@
 import express, { Application } from "express";
 import dotenv from "dotenv";
+import authRoutes from "./routes/auth.routes";
+import connectDB from "./config/database";
 
 dotenv.config();
 
 const app: Application = express();
 
+//! Middlewares globales
 app.use(express.json());
 
-//! Rutas
-app.get("/", (_req, res) => {
-    res.json({ message: "Test route" });
-});
+//! Conectamos a la DB
+connectDB();
+
+//! Montamos las Rutas
+app.use("/api/auth", authRoutes);
 
 export default app;
