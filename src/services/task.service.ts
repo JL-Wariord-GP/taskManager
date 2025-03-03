@@ -1,43 +1,46 @@
-import mongoose from "mongoose";
 import Task, { ITask } from "../models/task.model";
 
 const createTask = async (
   taskData: Partial<ITask>,
-  authenticatedUserId?: string
+  userId: string
 ): Promise<ITask> => {
-  if (authenticatedUserId) {
-    // Convertimos el string a ObjectId
-    taskData.user = new mongoose.Types.ObjectId(authenticatedUserId);
-  }
-  const task = new Task(taskData);
-  return await task.save();
+  // Se asigna el usuario autenticado a la tarea, sobrescribiendo cualquier valor enviado
+  const newTask = new Task({ ...taskData, user: userId });
+  return await newTask.save();
 };
 
 const updateTask = async (
-  taskId: string | mongoose.Types.ObjectId,
+  taskId: string,
   updateData: Partial<ITask>,
-  authenticatedUserId?: string
+  userId: string
 ): Promise<ITask | null> => {
-  if (authenticatedUserId) {
-    updateData.user = new mongoose.Types.ObjectId(authenticatedUserId);
-  }
-  return await Task.findByIdAndUpdate(taskId, updateData, { new: true });
+  // Se utiliza $set para actualizar solo los campos enviados y se ejecutan las validaciones
+  return await Task.findOneAndUpdate(
+    { _id: taskId, user: userId },
+    { $set: updateData },
+    { new: true, runValidators: true }
+  );
 };
 
 const deleteTask = async (
-  taskId: mongoose.Types.ObjectId | string
+  taskId: string,
+  userId: string
 ): Promise<ITask | null> => {
-  return await Task.findByIdAndDelete(taskId);
+  // Elimina solo si la tarea pertenece al usuario autenticado
+  return await Task.findOneAndDelete({ _id: taskId, user: userId });
 };
 
 const getTaskById = async (
-  taskId: string | mongoose.Types.ObjectId
+  taskId: string,
+  userId: string
 ): Promise<ITask | null> => {
-  return await Task.findById(taskId);
+  // Obtiene la tarea filtrando por su id y el usuario propietario
+  return await Task.findOne({ _id: taskId, user: userId });
 };
 
-const getAllTasks = async (): Promise<ITask[]> => {
-  return await Task.find();
+const getTasksByUser = async (userId: string): Promise<ITask[]> => {
+  // Retorna solo las tareas que pertenecen al usuario autenticado
+  return await Task.find({ user: userId });
 };
 
 export default {
@@ -45,5 +48,5 @@ export default {
   updateTask,
   deleteTask,
   getTaskById,
-  getAllTasks,
+  getTasksByUser,
 };
