@@ -24,8 +24,14 @@ const updateTask = async (
   return await Task.findByIdAndUpdate(taskId, updateData, { new: true });
 };
 
+const deleteTask = async (
+  taskId: mongoose.Types.ObjectId | string
+): Promise<ITask | null> => {
+  return await Task.findByIdAndDelete(taskId);
+};
+
 export default {
   createTask,
   updateTask,
-
+  deleteTask,
 };

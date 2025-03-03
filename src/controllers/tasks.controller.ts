@@ -47,3 +47,22 @@ export const updateTask = async (
   }
 };
 
+export const deleteTask = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const deletedTask = await taskService.deleteTask(id);
+    if (!deletedTask) {
+      res.status(404).json({ message: "Task not found" });
+      return;
+    }
+    res
+      .status(200)
+      .json({ message: "Task deleted successfully", task: deletedTask });
+  } catch (error) {
+    next(error);
+  }
+};
