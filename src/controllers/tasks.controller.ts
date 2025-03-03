@@ -1,9 +1,6 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import taskService from "../services/task.service";
-
-interface AuthenticatedRequest extends Request {
-  userId?: string;
-}
+import { AuthenticatedRequest } from "../middleware/auth.middleware";
 
 export const createTask = async (
   req: AuthenticatedRequest,
@@ -11,9 +8,9 @@ export const createTask = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const authenticatedUserId = req.userId as string;
+    const userId = req.user!.id;
     const taskData = req.body;
-    const newTask = await taskService.createTask(taskData, authenticatedUserId);
+    const newTask = await taskService.createTask(taskData, userId);
     res.status(201).json(newTask);
   } catch (error) {
     next(error);
@@ -21,42 +18,38 @@ export const createTask = async (
 };
 
 export const updateTask = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
     const { id } = req.params;
-
-    const authenticatedUserId = (req as any).userId as string;
+    const userId = req.user!.id;
     const updateData = req.body;
-    const updatedTask = await taskService.updateTask(
-      id,
-      updateData,
-      authenticatedUserId
-    );
+    const updatedTask = await taskService.updateTask(id, updateData, userId);
     if (!updatedTask) {
-        res
-        .status(404)
-        .json({ message: "Task not found" });
+      res.status(404).json({ message: "Task not found or not authorized" });
       return;
     }
-      res.status(200).json({message: "Task update successfully", task: updatedTask});
+    res
+      .status(200)
+      .json({ message: "Task updated successfully", task: updatedTask });
   } catch (error) {
     next(error);
   }
 };
 
 export const deleteTask = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    const deletedTask = await taskService.deleteTask(id);
+    const userId = req.user!.id;
+    const deletedTask = await taskService.deleteTask(id, userId);
     if (!deletedTask) {
-      res.status(404).json({ message: "Task not found" });
+      res.status(404).json({ message: "Task not found or not authorized" });
       return;
     }
     res
@@ -68,15 +61,16 @@ export const deleteTask = async (
 };
 
 export const getTask = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    const task = await taskService.getTaskById(id);
+    const userId = req.user!.id;
+    const task = await taskService.getTaskById(id, userId);
     if (!task) {
-      res.status(404).json({ message: "Task not found" });
+      res.status(404).json({ message: "Task not found or not authorized" });
       return;
     }
     res.status(200).json(task);
@@ -86,12 +80,13 @@ export const getTask = async (
 };
 
 export const getTasks = async (
-  _req: Request,
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
-    const tasks = await taskService.getAllTasks();
+    const userId = req.user!.id;
+    const tasks = await taskService.getTasksByUser(userId);
     res.status(200).json(tasks);
   } catch (error) {
     next(error);
