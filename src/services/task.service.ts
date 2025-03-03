@@ -30,8 +30,20 @@ const deleteTask = async (
   return await Task.findByIdAndDelete(taskId);
 };
 
+const getTaskById = async (
+  taskId: string | mongoose.Types.ObjectId
+): Promise<ITask | null> => {
+  return await Task.findById(taskId);
+};
+
+const getAllTasks = async (): Promise<ITask[]> => {
+  return await Task.find();
+};
+
 export default {
   createTask,
   updateTask,
   deleteTask,
+  getTaskById,
+  getAllTasks,
 };

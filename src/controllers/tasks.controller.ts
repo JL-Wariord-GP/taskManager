@@ -66,3 +66,34 @@ export const deleteTask = async (
     next(error);
   }
 };
+
+export const getTask = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const task = await taskService.getTaskById(id);
+    if (!task) {
+      res.status(404).json({ message: "Task not found" });
+      return;
+    }
+    res.status(200).json(task);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getTasks = async (
+  _req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const tasks = await taskService.getAllTasks();
+    res.status(200).json(tasks);
+  } catch (error) {
+    next(error);
+  }
+};
