@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { createTask } from "../controllers/tasks.controller";
+import { createTask, updateTask } from "../controllers/tasks.controller";
 
-
-const router= Router();
+const router = Router();
 
 router.post("/", createTask);
+router.put("/:id", updateTask);
 
 export default router;
