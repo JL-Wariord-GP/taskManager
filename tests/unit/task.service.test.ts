@@ -16,7 +16,6 @@ describe("Task Service - Create Task", () => {
     await connectDB();
   });
 
-
   afterAll(async () => {
     // Limpia y cierra la conexión al finalizar las pruebas.
     await mongoose.connection.dropDatabase();
@@ -149,5 +148,74 @@ describe("Task Service - Delete Task", () => {
     // Además, comprobamos que la tarea ya no se encuentre en la base de datos
     const foundTask = await Task.findById(createdTaskId);
     expect(foundTask).toBeNull();
+  });
+});
+
+describe("Task Service - Get Task", () => {
+  let mongoServer: MongoMemoryServer;
+
+  beforeAll(async () => {
+    mongoServer = await MongoMemoryServer.create();
+    process.env.MONGO_URI = mongoServer.getUri();
+    await connectDB();
+  });
+
+  afterAll(async () => {
+    await mongoose.connection.dropDatabase();
+    await mongoose.connection.close();
+    await mongoServer.stop();
+  });
+
+  beforeEach(async () => {
+    await Task.deleteMany({});
+  });
+
+  it("should retrieve a task by id", async () => {
+    // Creamos una tarea
+    const taskData = {
+      title: "Task for GET",
+      description: "Description for GET test",
+      completed: false,
+      user: new mongoose.Types.ObjectId(), // Usamos ObjectId directamente
+    };
+
+    const createdTask = await taskService.createTask(taskData);
+    expect(createdTask).toBeDefined();
+
+    // Llamamos al método getTaskById con el _id de la tarea creada
+    const fetchedTask = await taskService.getTaskById(
+      createdTask._id as mongoose.Types.ObjectId
+    );
+    expect(fetchedTask).toBeDefined();
+    expect((fetchedTask?._id as mongoose.Types.ObjectId).toString()).toBe(
+      (createdTask._id as mongoose.Types.ObjectId).toString()
+    );
+    expect(fetchedTask?.title).toBe(taskData.title);
+    expect(fetchedTask?.description).toBe(taskData.description);
+    expect(fetchedTask?.completed).toBe(taskData.completed);
+  });
+
+  it("should retrieve a list of tasks", async () => {
+    // Creamos varias tareas
+    const tasksData = [
+      {
+        title: "Task 1",
+        description: "Desc 1",
+        completed: false,
+        user: new mongoose.Types.ObjectId(),
+      },
+      {
+        title: "Task 2",
+        description: "Desc 2",
+        completed: true,
+        user: new mongoose.Types.ObjectId(),
+      },
+    ];
+    for (const data of tasksData) {
+      await taskService.createTask(data);
+    }
+
+    const tasks = await taskService.getAllTasks();
+    expect(tasks.length).toBeGreaterThanOrEqual(tasksData.length);
   });
 });
