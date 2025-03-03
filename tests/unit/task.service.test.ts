@@ -50,3 +50,57 @@ describe("Task Service - Create Task", () => {
     expect(createdTask.completed).toBe(false);
   });
 });
+
+describe("Task Service - Update Task", () => {
+  let mongoServer: MongoMemoryServer;
+
+  beforeAll(async () => {
+    mongoServer = await MongoMemoryServer.create();
+    process.env.MONGO_URI = mongoServer.getUri();
+    await connectDB();
+  });
+
+  afterAll(async () => {
+    await mongoose.connection.dropDatabase();
+    await mongoose.connection.close();
+    await mongoServer.stop();
+  });
+
+  beforeEach(async () => {
+    await Task.deleteMany({});
+  });
+
+  it("should update a task with valid update data", async () => {
+    // Creamos una tarea inicial
+    const taskData = {
+      title: "Tarea Inicial",
+      description: "Descripción inicial",
+      completed: false,
+      user: new mongoose.Types.ObjectId(),
+    };
+
+    const createdTask = await taskService.createTask(taskData);
+    expect(createdTask).toBeDefined();
+    // Se asegura que la tarea tenga los datos iniciales
+    expect(createdTask.title).toBe("Tarea Inicial");
+    expect(createdTask.completed).toBe(false);
+
+    // Datos de actualización (modificamos el título y el estado)
+    const updateData = {
+      title: "Tarea Actualizada",
+      completed: true,
+    };
+
+    // Llamamos al servicio de actualización pasándole el ID de la tarea y los datos de actualización
+    const updatedTask = await taskService.updateTask(
+      createdTask._id as mongoose.Types.ObjectId,
+      updateData
+    );
+    expect(updatedTask).toBeDefined();
+    // Validamos que los campos se hayan actualizado
+    expect(updatedTask?.title).toBe("Tarea Actualizada");
+    expect(updatedTask?.completed).toBe(true);
+    // Se espera que la descripción no cambie
+    expect(updatedTask?.description).toBe("Descripción inicial");
+  });
+});
