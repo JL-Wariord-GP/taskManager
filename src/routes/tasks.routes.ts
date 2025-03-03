@@ -1,13 +1,23 @@
 import { Router } from "express";
-import { createTask, deleteTask, getTask, getTasks, updateTask } from "../controllers/tasks.controller";
+import {
+  createTask,
+  updateTask,
+  deleteTask,
+  getTask,
+  getTasks,
+} from "../controllers/tasks.controller";
+import { protect } from "../middleware/auth.middleware";
 
 const router = Router();
 
-router.post("/", createTask);
-router.put("/:id", updateTask);
-router.delete("/:id", deleteTask)
+//! Aplicamos el middleware para proteger todas las rutas
+router.use(protect);
 
+//! Endpoints protegidos
+router.post("/", createTask);
 router.get("/:id", getTask);
 router.get("/", getTasks);
+router.put("/:id", updateTask);
+router.delete("/:id", deleteTask);
 
 export default router;
