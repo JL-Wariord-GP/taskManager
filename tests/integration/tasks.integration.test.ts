@@ -112,3 +112,49 @@ describe("Tasks API - Update Task", () => {
     expect(updateResponse.body.task.description).toBe(taskData.description);
   });
 });
+
+describe("Tasks API - Delete Task", () => {
+  let mongoServer: MongoMemoryServer;
+
+  beforeAll(async () => {
+    mongoServer = await MongoMemoryServer.create();
+    process.env.MONGO_URI = mongoServer.getUri();
+    await connectDB();
+  });
+
+  afterAll(async () => {
+    await mongoose.connection.dropDatabase();
+    await mongoose.connection.close();
+    await mongoServer.stop();
+  });
+
+  it("should delete a task via API", async () => {
+    // Creamos una tarea primero a través del endpoint POST
+    const taskData = {
+      title: "Tarea a eliminar vía API",
+      description: "Esta tarea se eliminará vía API",
+      completed: false,
+      user: new mongoose.Types.ObjectId().toString(),
+    };
+
+    const resCreate = await request(app)
+      .post("/api/tasks")
+      .send(taskData)
+      .set("Accept", "application/json");
+
+    expect(resCreate.status).toBe(201);
+    const taskId = resCreate.body._id;
+
+    // Llamamos al endpoint DELETE para eliminar la tarea
+    const resDelete = await request(app).delete(`/api/tasks/${taskId}`);
+    expect(resDelete.status).toBe(200);
+    expect(resDelete.body).toHaveProperty(
+      "message",
+      "Task deleted successfully"
+    );
+
+    // Opcional: Verificamos que la tarea no exista en la base de datos
+    const resGet = await request(app).get(`/api/tasks/${taskId}`);
+    expect(resGet.status).toBe(404);
+  });
+});

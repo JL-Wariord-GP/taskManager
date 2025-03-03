@@ -104,3 +104,50 @@ describe("Task Service - Update Task", () => {
     expect(updatedTask?.description).toBe("Descripción inicial");
   });
 });
+
+describe("Task Service - Delete Task", () => {
+  let mongoServer: MongoMemoryServer;
+
+  beforeAll(async () => {
+    mongoServer = await MongoMemoryServer.create();
+    process.env.MONGO_URI = mongoServer.getUri();
+    await connectDB();
+  });
+
+  afterAll(async () => {
+    await mongoose.connection.dropDatabase();
+    await mongoose.connection.close();
+    await mongoServer.stop();
+  });
+
+  beforeEach(async () => {
+    await Task.deleteMany({});
+  });
+
+  it("should delete a task given a valid task ID", async () => {
+    // Creamos una tarea de prueba
+    const taskData = {
+      title: "Tarea a eliminar",
+      description: "Esta tarea se eliminará",
+      completed: false,
+      user: new mongoose.Types.ObjectId(), // Usamos ObjectId directamente
+    };
+
+    const createdTask = await taskService.createTask(taskData);
+    expect(createdTask).toBeDefined();
+    // Se hace un casting para indicar que _id es de tipo mongoose.Types.ObjectId
+    const createdTaskId = createdTask._id as mongoose.Types.ObjectId;
+    expect(createdTaskId).toBeDefined();
+
+    // Llamamos al método deleteTask pasándole el ID de la tarea creada
+    const deletedTask = await taskService.deleteTask(createdTaskId);
+    // Se hacen aserciones convirtiendo los _id a string para la comparación
+    expect((deletedTask?._id as mongoose.Types.ObjectId).toString()).toBe(
+      createdTaskId.toString()
+    );
+
+    // Además, comprobamos que la tarea ya no se encuentre en la base de datos
+    const foundTask = await Task.findById(createdTaskId);
+    expect(foundTask).toBeNull();
+  });
+});
