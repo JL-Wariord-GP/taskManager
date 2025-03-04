@@ -1,27 +1,26 @@
+//! tests/integration/db.connection.test.ts
+
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
-import connectDB from "../../src/config/database";
+import { initializeTestDB, closeTestDB } from "../testSetup";
 
+jest.setTimeout(30000);
 describe("Database Connection", () => {
   let mongoServer: MongoMemoryServer;
 
   beforeAll(async () => {
-    // Creamos  la instancia en memoria de MongoDB
-    mongoServer = await MongoMemoryServer.create();
-    // Sobreescribimos la variable de entorno con la URI del MongoMemoryServer
-    process.env.MONGO_URI = mongoServer.getUri();
-    // Nos conectamos usando la función de conexión
-    await connectDB();
+    // Initializes the in-memory DB and connects using the centralized configuration.
+    const setup = await initializeTestDB();
+    mongoServer = setup.mongoServer;
   });
 
   afterAll(async () => {
-    // Hacemos la desconexion mongoose y detenemos el servidor en memoria
-    await mongoose.disconnect();
-    await mongoServer.stop();
+    // Cleans up the DB and stops the in-memory server.
+    await closeTestDB(mongoServer);
   });
 
-  it("should connect to the in-memory database", async () => {
-    // Se hace la verificacion que la conexión esté activa (readyState === 1 indica conectado)
+  it("should connect to the in-memory database", () => {
+    // readyState === 1 indicates that the connection is active.
     expect(mongoose.connection.readyState).toBe(1);
   });
 });
