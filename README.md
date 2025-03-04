@@ -1,4 +1,3 @@
-```markdown
 # Task Management System
 
 This project is a REST API for task management that implements authentication and authorization using Node.js, Express, TypeScript, and MongoDB. It was developed using a TDD (Test-Driven Development) approach to ensure quality, robustness, and maintainability of the code.
@@ -98,9 +97,9 @@ Before you begin, make sure you have the following installed:
 Clone the repository to your local machine using Git:
 
 ```bash
-git clone https://github.com/your-username/your-repository.git
-cd your-repository
-```
+git https://github.com/JL-Wariord-GP/taskManager
+cd taskManager
+
 
 ### Installing Dependencies
 
