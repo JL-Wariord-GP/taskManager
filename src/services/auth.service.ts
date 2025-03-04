@@ -1,46 +1,43 @@
-import bcrypt from "bcrypt";
+// src/services/auth.service.ts
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import User, { IUser } from "../models/user.model";
+import { config } from "../config/config";
+import { IUser } from "../models/user.model";
+import User from "../models/user.model";
 
-interface LoginInput {
-  email: string;
-  password: string;
-}
-
-interface LoginResponse {
-  user: IUser;
-  token: string;
-}
-
-const loginUser = async ({
-  email,
-  password,
-}: LoginInput): Promise<LoginResponse> => {
-  // Se busca el usuario por correo electrónico
-  const user = await User.findOne({ email });
-  if (!user) {
-    // Lanza un error si no se encuentra el usuario
-    throw new Error("User not found");
-  }
-
-  // Comparar la contraseña proporcionada con la almacenada (encriptada)
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) {
-    // Lanza un error si las contraseñas no coinciden
-    throw new Error("Invalid credentials");
-  }
-
-  // Generar un token JWT
-  const token = jwt.sign(
-    { id: user._id },
-    process.env.JWT_SECRET || "defaultSecret", 
-    { expiresIn: "1h" }
-  );
-
-  // Retorna el usuario y el token
-  return { user, token };
+export const hashPassword = async (password: string): Promise<string> => {
+  const salt = await bcrypt.genSalt(10);
+  return await bcrypt.hash(password, salt);
 };
 
-export default {
-  loginUser,
+export const comparePassword = async (
+  password: string,
+  hash: string
+): Promise<boolean> => {
+  return await bcrypt.compare(password, hash);
+};
+
+export const generateToken = (user: IUser): string => {
+  return jwt.sign({ id: user._id, email: user.email }, config.jwtSecret, {
+    expiresIn: "1h",
+  });
+};
+
+export const loginUser = async ({
+  email,
+  password,
+}: {
+  email: string;
+  password: string;
+}): Promise<{ token: string; user: IUser }> => {
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new Error("User not found");
+  }
+  const isValid = await comparePassword(password, user.password);
+  if (!isValid) {
+    throw new Error("Invalid credentials");
+  }
+  const token = generateToken(user);
+  return { token, user };
 };
