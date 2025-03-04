@@ -1,31 +1,32 @@
-import mongoose from "mongoose";
+//! tests/services/user.service.test.ts
+
 import bcrypt from "bcrypt";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import userService from "../../src/services/user.service";
 import User from "../../src/models/user.model";
-import connectDB from "../../src/config/database";
+import { initializeTestDB, closeTestDB } from "../testSetup";
 
+/**
+ * Integration tests for the user service.
+ * Ensures that user creation works correctly and that passwords are encrypted.
+ */
+jest.setTimeout(30000);
 describe("User Service", () => {
   let mongoServer: MongoMemoryServer;
 
   beforeAll(async () => {
-    // Creamos  la instancia en memoria de MongoDB
-    mongoServer = await MongoMemoryServer.create();
-    // Sobreescribimos la variable de entorno con la URI del MongoMemoryServer
-    process.env.MONGO_URI = mongoServer.getUri();
-    // Nos conectamos usando la función de conexión
-    await connectDB();
+    // Initialize the in-memory database using the helper.
+    const setup = await initializeTestDB();
+    mongoServer = setup.mongoServer;
   });
 
   afterAll(async () => {
-    // Limpiamos la base de datos y cerramos la conexión
-    await mongoose.connection.dropDatabase();
-    await mongoose.connection.close();
-    await mongoServer.stop();
+    // Clean up and stop the in-memory database.
+    await closeTestDB(mongoServer);
   });
 
   beforeEach(async () => {
-    // Eliminamos todos los documentos del modelo User antes de cada prueba
+    // Remove all User documents to ensure an isolated test environment.
     await User.deleteMany({});
   });
 
@@ -36,19 +37,19 @@ describe("User Service", () => {
       password: "securepassword",
     };
 
-    // Llamamos al servicio para crear el usuario
+    // Create the user using the user service.
     const newUser = await userService.createUser(userData);
 
-    // Verificamos que se haya creado el usuario correctamente
+    // Verify that the user was created successfully.
     expect(newUser).toBeDefined();
     expect(newUser._id).toBeDefined();
     expect(newUser.name).toBe(userData.name);
     expect(newUser.email).toBe(userData.email);
 
-    // Aqui Verifica que la contraseña encriptada NO es igual a la original
+    // Ensure that the stored password is encrypted and not equal to the plain text.
     expect(newUser.password).not.toBe(userData.password);
 
-    // Se utiliza bcrypt.compare para confirmar que la contraseña original coincide con la encriptada
+    // Confirm that the original password matches the encrypted version.
     const isMatch = await bcrypt.compare(userData.password, newUser.password);
     expect(isMatch).toBe(true);
   });
