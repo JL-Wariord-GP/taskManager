@@ -7,6 +7,11 @@ import {
   getTasks,
 } from "../controllers/tasks.controller";
 import { protect } from "../middleware/auth.middleware";
+import { validate } from "../middleware/validate.tasks.middleware";
+import {
+  createTaskSchema,
+  updateTaskSchema,
+} from "../validations/task.validation";
 
 const router = Router();
 
@@ -23,9 +28,6 @@ const router = Router();
  *         description:
  *           type: string
  *           description: Detailed description of the task.
- *         completed:
- *           type: boolean
- *           description: Task completion status.
  *         dueDate:
  *           type: string
  *           format: date-time
@@ -46,7 +48,7 @@ const router = Router();
  *     description: API endpoints for managing tasks
  */
 
-// Aplica el middleware de autenticación a todas las rutas de tasks
+// Apply the authentication middleware to all task routes
 router.use(protect);
 
 /**
@@ -74,7 +76,14 @@ router.use(protect);
  *       400:
  *         description: Bad request.
  */
-router.post("/", createTask);
+router.post(
+  "/",
+  validate(
+    createTaskSchema,
+    "Validation errors were found when creating a task."
+  ),
+  createTask
+);
 
 /**
  * @swagger
@@ -157,7 +166,14 @@ router.get("/", getTasks);
  *       404:
  *         description: Task not found.
  */
-router.put("/:id", updateTask);
+router.put(
+  "/:id",
+  validate(
+    updateTaskSchema,
+    "Validation errors were found when updating the task."
+  ),
+  updateTask
+);
 
 /**
  * @swagger
