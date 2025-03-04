@@ -1,4 +1,4 @@
-//! src/controllers/authController.ts
+//! src/controllers/auth.controller.ts
 
 import { Request, Response } from "express";
 import User from "../models/user.model";
@@ -62,7 +62,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       expiresIn: "24h",
     });
 
-    // Construct the verification link using the protocol and host from the request
+    // Construct the verification link using the request protocol and host
     const verificationLink = `${req.protocol}://${req.get(
       "host"
     )}/api/auth/verify?token=${verificationToken}`;
@@ -81,15 +81,18 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     };
 
     const emailSent = await sendEmail(emailOptions);
+
     if (emailSent) {
       res.status(201).json({
         message:
           "User successfully registered. Please check your inbox to verify your account.",
       });
     } else {
+      // If sending the email fails, delete the newly created user
+      await User.findByIdAndDelete(newUser._id);
       res.status(500).json({
         message:
-          "User registered, but there was an error sending the verification email.",
+          "Error sending verification email. The user was not created. Please try again later.",
       });
     }
   } catch (error: any) {
@@ -105,7 +108,6 @@ export const verifyUser = async (
   res: Response
 ): Promise<void> => {
   const { token } = req.query;
-  console.log("Route /verify called. Query:", req.query);
   if (!token || typeof token !== "string") {
     res.status(400).json({ message: "Verification token not provided." });
     return;
