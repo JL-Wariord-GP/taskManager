@@ -1,15 +1,17 @@
+// tests/services/auth.service.test.ts
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import userService from "../../src/services/user.service";
 import User from "../../src/models/user.model";
 import connectDB from "../../src/config/database";
-import authService from "../../src/services/auth.service";
+import * as authService from "../../src/services/auth.service";
+
 
 describe("Auth Service - Login", () => {
   let mongoServer: MongoMemoryServer;
 
   beforeAll(async () => {
-    // Creamos  la instancia en memoria de MongoDB
+    // Creamos la instancia en memoria de MongoDB
     mongoServer = await MongoMemoryServer.create();
     // Sobreescribimos la variable de entorno con la URI del MongoMemoryServer
     process.env.MONGO_URI = mongoServer.getUri();
