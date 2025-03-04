@@ -42,11 +42,10 @@ export const sendEmail = async (
     };
 
     // Send the email
-    const info = await transporter.sendMail(message);
-    console.log("Email sent: %s", info.messageId);
+    await transporter.sendMail(message);
     return true;
   } catch (error) {
     console.error("Error sending email:", error);
-    return false; 
+    return false;
   }
 };
