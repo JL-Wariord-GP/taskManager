@@ -1,7 +1,9 @@
 import { RequestHandler } from "express";
 import { validationResult } from "express-validator";
 
-
+/**
+ * Middleware to handle validation errors from express-validator.
+ */
 export const validationError: RequestHandler = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -11,7 +13,7 @@ export const validationError: RequestHandler = (req, res, next) => {
     res.status(400).json({
       success: false,
       statusCode: 400,
-      message: "Se encontraron errores de validación.",
+      message: "Validation errors were found.",
       errors: errorDetails,
     });
     return;

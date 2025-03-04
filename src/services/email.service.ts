@@ -1,8 +1,9 @@
-// src/services/email.service.ts
+//! src/services/email.service.ts
+
 import nodemailer, { Transporter, SendMailOptions } from "nodemailer";
 import { config } from "../config/config";
 
-// Definimos una interfaz para las opciones del correo
+// Interface defining the structure of email options
 interface EmailOptions {
   to: string;
   subject: string;
@@ -10,29 +11,29 @@ interface EmailOptions {
 }
 
 /**
- * Envía un email utilizando el servicio SMTP configurado.
- * @param emailOptions - Opciones del email.
- * @param emailOptions.to - Correo del destinatario.
- * @param emailOptions.subject - Asunto del mensaje.
- * @param emailOptions.html - Contenido HTML del mensaje.
- * @returns Retorna true si se envió correctamente; false en caso de error.
+ * Sends an email using the configured SMTP service.
+ * @param emailOptions - Options for sending the email.
+ * @param emailOptions.to - Recipient's email address.
+ * @param emailOptions.subject - Subject of the email.
+ * @param emailOptions.html - HTML content of the email.
+ * @returns Returns true if the email was sent successfully, false if an error occurred.
  */
 export const sendEmail = async (
   emailOptions: EmailOptions
 ): Promise<boolean> => {
   try {
-    // Crear el transportador utilizando las configuraciones del archivo config
+    // Create a transporter using the config settings
     const transporter: Transporter = nodemailer.createTransport({
       host: config.email.host,
       port: config.email.port,
-      secure: config.email.port === 465, // true para 465, false para otros puertos
+      secure: config.email.port === 465,
       auth: {
         user: config.email.user,
         pass: config.email.pass,
       },
     });
 
-    // Configuración del mensaje a enviar
+    // Set up the email message
     const message: SendMailOptions = {
       from: `"${config.email.fromName}" <${config.email.user}>`,
       to: emailOptions.to,
@@ -40,12 +41,12 @@ export const sendEmail = async (
       html: emailOptions.html,
     };
 
-    // Enviar el correo
+    // Send the email
     const info = await transporter.sendMail(message);
-    console.log("Email enviado: %s", info.messageId);
+    console.log("Email sent: %s", info.messageId);
     return true;
   } catch (error) {
-    console.error("Error al enviar email:", error);
-    return false;
+    console.error("Error sending email:", error);
+    return false; 
   }
 };

@@ -1,3 +1,4 @@
+
 import { Request, Response, NextFunction } from "express";
 import { verifyToken } from "../utils/jwt.util";
 
@@ -8,6 +9,10 @@ export interface AuthenticatedRequest extends Request {
   };
 }
 
+/**
+ * Middleware to protect routes using JWT.
+ * Verifies that a valid token is provided in the Authorization header.
+ */
 export const protect = (
   req: AuthenticatedRequest,
   res: Response,

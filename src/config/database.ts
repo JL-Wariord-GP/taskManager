@@ -1,20 +1,24 @@
+
+
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 
-//! Cargamos las variables de entorno
+//! Load environment variables
 dotenv.config();
 
-//! Configuramos la conexion a Mongoose (DB MongoDB)
+/**
+ * Configures and connects to MongoDB using Mongoose.
+ */
 const connectDB = async (): Promise<void> => {
   try {
     const mongoURI = process.env.MONGO_URI || "";
     if (!mongoURI) {
-      throw new Error("There is no MongoDB URI configured");
+      throw new Error("No MongoDB URI is configured");
     }
     await mongoose.connect(mongoURI);
     console.log("MongoDB connected successfully");
   } catch (error) {
-    console.log("Error connecting to MongoDB:", error);
+    console.error("Error connecting to MongoDB:", error);
     process.exit(1);
   }
 };

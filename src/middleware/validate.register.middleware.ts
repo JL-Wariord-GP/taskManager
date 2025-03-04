@@ -4,43 +4,43 @@ export const validateRegister = [
   check("name")
     .trim()
     .notEmpty()
-    .withMessage("Debe ingresar su nombre.")
+    .withMessage("Name is required.")
     .matches(/^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]+$/)
-    .withMessage("El nombre solo puede contener letras.")
+    .withMessage("Name can only contain letters.")
     .isLength({ min: 2, max: 50 })
-    .withMessage("El nombre debe tener entre 2 y 50 caracteres."),
+    .withMessage("Name must be between 2 and 50 characters."),
   check("email")
     .notEmpty()
-    .withMessage("Debe ingresar un correo.")
+    .withMessage("Email is required.")
     .isEmail()
-    .withMessage("Debe ser un correo electrónico válido.")
+    .withMessage("A valid email address is required.")
     .normalizeEmail(),
   check("password")
     .notEmpty()
-    .withMessage("Debe ingresar una contraseña.")
+    .withMessage("Password is required.")
     .isLength({ min: 8, max: 16 })
-    .withMessage("La contraseña debe tener entre 8 y 16 caracteres.")
+    .withMessage("Password must be between 8 and 16 characters.")
     .custom((value: string) => {
       if (!/[A-Z]/.test(value)) {
-        throw new Error("La contraseña debe contener mayúsculas.");
+        throw new Error("Password must contain uppercase letters.");
       }
       return true;
     })
     .custom((value: string) => {
       if (!/[a-z]/.test(value)) {
-        throw new Error("La contraseña debe contener minúsculas.");
+        throw new Error("Password must contain lowercase letters.");
       }
       return true;
     })
     .custom((value: string) => {
       if (!/\d/.test(value)) {
-        throw new Error("La contraseña debe contener números.");
+        throw new Error("Password must contain numbers.");
       }
       return true;
     })
     .custom((value: string) => {
       if (!/[!@#$%^&*(),.?":{}|<>]/.test(value)) {
-        throw new Error("La contraseña debe contener un carácter especial.");
+        throw new Error("Password must contain a special character.");
       }
       return true;
     }),

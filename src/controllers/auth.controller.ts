@@ -1,4 +1,4 @@
-// src/controllers/authController.ts
+//! src/controllers/authController.ts
 
 import { Request, Response } from "express";
 import User from "../models/user.model";
@@ -29,25 +29,25 @@ interface TokenPayload {
 }
 
 /**
- * Registra un nuevo usuario.
- * Además de la lógica existente (incluyendo la validación del rol),
- * se envía un email de verificación con un enlace para activar la cuenta.
+ * Registers a new user.
+ * In addition to the existing logic (including role validation),
+ * an email verification is sent with a link to activate the account.
  */
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
     const { name, email, password } = req.body as RegisterRequestBody;
 
-    // Verificar si el email ya están en uso
+    // Check if the email is already in use
     const existingUser = await User.findOne({ $or: [{ email }] });
     if (existingUser) {
-      res.status(400).json({ message: "El usuario o email ya están en uso" });
+      res.status(400).json({ message: "User or email already in use" });
       return;
     }
 
-    // Hashear la contraseña
+    // Hash the password
     const hashedPassword = await hashPassword(password);
 
-    // Crear el usuario con verified por defecto en false
+    // Create the user with 'verified' set to false by default
     const newUser = new User({
       name,
       email,
@@ -57,26 +57,26 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
     await newUser.save();
 
-    // Generar token de verificación (válido por 24 horas)
+    // Generate a verification token (valid for 24 hours)
     const verificationToken = jwt.sign({ id: newUser._id }, config.jwtSecret, {
       expiresIn: "24h",
     });
 
-    //Construir el enlace de verificación usando el protocolo y host de la petición
+    // Construct the verification link using the protocol and host from the request
     const verificationLink = `${req.protocol}://${req.get(
       "host"
     )}/api/auth/verify?token=${verificationToken}`;
 
-    // Preparar el email de verificación
+    // Prepare the verification email
     const emailOptions = {
       to: email,
-      subject: "Sistema de Gestión de Tareas - Verificación de cuenta",
+      subject: "Task Management System - Account Verification",
       html: `
-        <p>Estimado/a ${name},</p>
-        <p>Gracias por registrarse en nuestro sistema. Para completar su registro y activar su cuenta, por favor haga clic en el siguiente enlace:</p>
-        <p><a href="${verificationLink}">Verificar mi cuenta</a></p>
-        <p>Si usted no ha solicitado este registro, por favor ignore este mensaje.</p>
-        <p>Atentamente,<br/>Developer Jorge Gomez</p>
+        <p>Dear ${name},</p>
+        <p>Thank you for registering with our system. To complete your registration and activate your account, please click the following link:</p>
+        <p><a href="${verificationLink}">Verify my account</a></p>
+        <p>If you did not request this registration, please ignore this message.</p>
+        <p>Best regards,<br/>Developer Jorge Gomez</p>
       `,
     };
 
@@ -84,34 +84,30 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     if (emailSent) {
       res.status(201).json({
         message:
-          "Usuario registrado exitosamente. Por favor, revise su bandeja de entrada para validar su cuenta.",
+          "User successfully registered. Please check your inbox to verify your account.",
       });
     } else {
       res.status(500).json({
         message:
-          "Usuario registrado, pero ocurrió un error al enviar el email de verificación.",
+          "User registered, but there was an error sending the verification email.",
       });
     }
   } catch (error: any) {
-    res
-      .status(500)
-      .json({ message: "Error en el servidor", error: error.message });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
 /**
- * Verifica la cuenta del usuario a partir del token enviado por email.
+ * Verifies the user's account using the token sent via email.
  */
 export const verifyUser = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   const { token } = req.query;
-  console.log("Ruta /verify llamada. Query:", req.query);
+  console.log("Route /verify called. Query:", req.query);
   if (!token || typeof token !== "string") {
-    res
-      .status(400)
-      .json({ message: "Token de verificación no proporcionado." });
+    res.status(400).json({ message: "Verification token not provided." });
     return;
   }
   try {
@@ -123,43 +119,39 @@ export const verifyUser = async (
       { new: true }
     );
     if (!user) {
-      res.status(404).json({ message: "Usuario no encontrado." });
+      res.status(404).json({ message: "User not found." });
       return;
     }
     res.status(200).json({
-      message: "Email verificado exitosamente. Su cuenta ahora está activada.",
+      message: "Email successfully verified. Your account is now activated.",
     });
   } catch (error: any) {
-    res
-      .status(400)
-      .json({ message: "Token de verificación inválido o expirado." });
+    res.status(400).json({ message: "Invalid or expired verification token." });
   }
 };
 
 /**
- * Inicia sesión y retorna un token JWT.
+ * Logs in and returns a JWT token.
  */
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body as LoginRequestBody;
     const user = await User.findOne({ email });
     if (!user || !(await comparePassword(password, user.password))) {
-      res.status(400).json({ message: "Credenciales incorrectas" });
+      res.status(400).json({ message: "Incorrect credentials" });
       return;
     }
-    // Verificar que la cuenta esté activada
+    // Check if the account is activated
     if (!user.verified) {
       res.status(403).json({
         message:
-          "Cuenta no verificada. Por favor, revise su email y verifique su cuenta para poder usar nuestros servicios.",
+          "Account not verified. Please check your email and verify your account to use our services.",
       });
       return;
     }
     const token = generateToken(user);
     res.json({ token });
   } catch (error: any) {
-    res
-      .status(500)
-      .json({ message: "Error en el servidor", error: error.message });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };

@@ -1,31 +1,45 @@
+//! src/controllers/taskController.ts
+
 import { Response, NextFunction } from "express";
 import taskService from "../services/task.service";
 import { AuthenticatedRequest } from "../middleware/auth.middleware";
 
+/**
+ * Creates a new task for the authenticated user.
+ * @param req - The request object, which contains user data and task data.
+ * @param res - The response object, used to send back the created task.
+ * @param next - The next function to handle errors.
+ */
 export const createTask = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
-    const userId = req.user!.id;
-    const taskData = req.body;
+    const userId = req.user!.id; 
+    const taskData = req.body; 
     const newTask = await taskService.createTask(taskData, userId);
     res.status(201).json(newTask);
   } catch (error) {
-    next(error);
+    next(error); 
   }
 };
 
+/**
+ * Updates an existing task.
+ * @param req - The request object containing the task ID and updated data.
+ * @param res - The response object, used to send back the updated task.
+ * @param next - The next function to handle errors.
+ */
 export const updateTask = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { id } = req.params;
+    const { id } = req.params; 
     const userId = req.user!.id;
-    const updateData = req.body;
+    const updateData = req.body; 
     const updatedTask = await taskService.updateTask(id, updateData, userId);
     if (!updatedTask) {
       res.status(404).json({ message: "Task not found or not authorized" });
@@ -35,17 +49,23 @@ export const updateTask = async (
       .status(200)
       .json({ message: "Task updated successfully", task: updatedTask });
   } catch (error) {
-    next(error);
+    next(error); 
   }
 };
 
+/**
+ * Deletes a task for the authenticated user.
+ * @param req - The request object containing the task ID to delete.
+ * @param res - The response object, used to send back the deletion confirmation.
+ * @param next - The next function to handle errors.
+ */
 export const deleteTask = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { id } = req.params;
+    const { id } = req.params; 
     const userId = req.user!.id;
     const deletedTask = await taskService.deleteTask(id, userId);
     if (!deletedTask) {
@@ -56,17 +76,23 @@ export const deleteTask = async (
       .status(200)
       .json({ message: "Task deleted successfully", task: deletedTask });
   } catch (error) {
-    next(error);
+    next(error); 
   }
 };
 
+/**
+ * Retrieves a specific task for the authenticated user.
+ * @param req - The request object containing the task ID.
+ * @param res - The response object, used to send back the task data.
+ * @param next - The next function to handle errors.
+ */
 export const getTask = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { id } = req.params;
+    const { id } = req.params; 
     const userId = req.user!.id;
     const task = await taskService.getTaskById(id, userId);
     if (!task) {
@@ -79,6 +105,12 @@ export const getTask = async (
   }
 };
 
+/**
+ * Retrieves all tasks for the authenticated user.
+ * @param req - The request object.
+ * @param res - The response object, used to send back all tasks.
+ * @param next - The next function to handle errors.
+ */
 export const getTasks = async (
   req: AuthenticatedRequest,
   res: Response,
