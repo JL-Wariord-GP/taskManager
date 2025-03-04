@@ -5,6 +5,9 @@ import authRoutes from "./routes/auth.routes";
 import tasksRoutes from "./routes/tasks.routes";
 import connectDB from "./config/database";
 
+import swaggerSpec from "./config/swagger.config";
+import swaggerUi from 'swagger-ui-express';
+
 // Carga las variables de entorno (no sobrescribe si ya existen)
 dotenv.config();
 
@@ -21,6 +24,9 @@ if (process.env.NODE_ENV !== "test") {
 // Montamos las rutas
 app.use("/api/auth", authRoutes);
 app.use("/api/tasks", tasksRoutes);
+
+// Documentación Swagger en http://localhost:3000/api-docs
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Middleware de manejo de errores global (opcional)
 app.use(
