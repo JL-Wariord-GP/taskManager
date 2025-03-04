@@ -15,6 +15,11 @@ const createUser = async (userData: Partial<IUser>): Promise<IUser> => {
   return await user.save();
 };
 
+const findByEmail = async (email: string): Promise<IUser | null> => {
+  return await User.findOne({ email });
+};
+
 export default {
   createUser,
+  findByEmail,
 };
