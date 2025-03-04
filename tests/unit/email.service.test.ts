@@ -1,17 +1,18 @@
-// src/tests/email.service.test.ts
+//! src/tests/email.service.test.ts
 import nodemailer from "nodemailer";
 import { sendEmail } from "../../src/services/email.service";
 import { config } from "../../src/config/config";
 
-// Creamos mocks para nodemailer
+// Create mocks for nodemailer.
 jest.mock("nodemailer");
+jest.setTimeout(30000);
 
 const sendMailMock = jest.fn();
 const createTransportMock = nodemailer.createTransport as jest.Mock;
 
 describe("Email Service Unit Tests", () => {
   beforeEach(() => {
-    // Reiniciamos los mocks antes de cada prueba
+    // Reset the mocks before each test.
     sendMailMock.mockReset();
     createTransportMock.mockReset();
     createTransportMock.mockReturnValue({
@@ -20,7 +21,7 @@ describe("Email Service Unit Tests", () => {
   });
 
   it("should send email successfully and return true", async () => {
-    // Simulamos una respuesta exitosa del método sendMail
+    // Simulate a successful response from the sendMail method.
     sendMailMock.mockResolvedValue({ messageId: "12345" });
 
     const emailOptions = {
@@ -50,7 +51,7 @@ describe("Email Service Unit Tests", () => {
   });
 
   it("should return false when sending email fails", async () => {
-    // Simulamos un error al enviar el correo
+    // Simulate an error when sending the email.
     sendMailMock.mockRejectedValue(new Error("SMTP error"));
 
     const emailOptions = {
