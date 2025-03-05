@@ -200,14 +200,37 @@ A Postman collection has also been created to test the API. This collection incl
 
 ---
 
-## Prompts and Automation
+## Prompts
 
-During the project development, automated prompts and scripts were used to:
+During the project development, various automated prompts and scripts were utilized to streamline workflows, enhance code quality, and maintain high standards throughout the project. Some of the key prompts used include:
 
-- Generate code skeletons following best practices.
-- Quickly configure new endpoints and unit tests.
-- Facilitate the integration of Swagger and real-time documentation generation.
-- Automate recurring tasks that optimize workflow and ensure high-quality standards.
+1. **Code Skeleton Generation:**  
+   *Prompt:* "Generate a well-structured code skeleton for a Node.js REST API using Express, TypeScript, and MongoDB, following TDD principles and best practices."  
+   *Purpose:* Establish a solid foundation for the project with a clear modular architecture.
+
+2. **Endpoint Configuration:**  
+   *Prompt:* "Create detailed Express routes for user authentication and task management, including robust input validation and JWT-based security."  
+   *Purpose:* Ensure that all endpoints are correctly configured and secured.
+
+3. **Error Handling Middleware:**  
+   *Prompt:* "Develop a comprehensive global error handling middleware in Express that logs stack traces and returns standardized JSON error responses."  
+   *Purpose:* Improve debugging and maintain consistency in error responses across the API.
+
+4. **Swagger Documentation Setup:**  
+   *Prompt:* "Configure Swagger for real-time API documentation that includes all endpoints, parameters, and response schemas for better developer experience."  
+   *Purpose:* Enable interactive exploration and testing of the API.
+
+5. **Postman Collection Generation:**  
+   *Prompt:* "Generate a detailed Postman collection JSON file that includes all API endpoints with example requests and environment variables for efficient API testing."  
+   *Purpose:* Facilitate rapid testing and validation of API functionality.
+
+6. **Unit Testing Framework Setup:**  
+   *Prompt:* "Set up unit tests using Jest and Supertest for critical services, including mocks for external dependencies such as nodemailer for email sending."  
+   *Purpose:* Ensure reliability of individual components and accurate simulation of external services.
+
+7. **Database Connection Configuration:**  
+   *Prompt:* "Create a module to connect to MongoDB using Mongoose, including proper error handling, connection logging, and environment-specific behavior."  
+   *Purpose:* Guarantee a robust and maintainable database connection setup.
 
 ---
 
