@@ -22,6 +22,12 @@ export const sendEmail = async (
   emailOptions: EmailOptions
 ): Promise<boolean> => {
   try {
+    // Check if the environment is test to avoid actual email sending during tests.
+    if (process.env.NODE_ENV === "test" && process.env.SKIP_EMAIL === "true") {
+      console.log("Test environment detected - skipping email sending.");
+      return true;
+    }
+
     // Create a transporter using the config settings
     const transporter: Transporter = nodemailer.createTransport({
       host: config.email.host,
@@ -45,7 +51,9 @@ export const sendEmail = async (
     await transporter.sendMail(message);
     return true;
   } catch (error) {
-    console.error("Error sending email:", error);
+    if (process.env.NODE_ENV !== "test") {
+      console.error("Error sending email:", error);
+    }
     return false;
   }
 };

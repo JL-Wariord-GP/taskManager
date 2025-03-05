@@ -12,6 +12,7 @@ const createTransportMock = nodemailer.createTransport as jest.Mock;
 
 describe("Email Service Unit Tests", () => {
   beforeEach(() => {
+    process.env.SKIP_EMAIL = "false";
     // Reset the mocks before each test.
     sendMailMock.mockReset();
     createTransportMock.mockReset();
