@@ -1,3 +1,5 @@
+//! src/middleware/validate.register.middleware.ts
+
 import { check } from "express-validator";
 
 export const validateRegister = [
